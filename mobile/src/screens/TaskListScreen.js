@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   FlatList,
@@ -9,6 +9,7 @@ import {
   StyleSheet,
   RefreshControl,
   SafeAreaView,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
@@ -39,6 +40,8 @@ const TaskListScreen = ({ navigation }) => {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
 
+  const searchWidthAnim = useRef(new Animated.Value(1)).current;
+
   const fetchTasks = async (silent = false) => {
     if (!silent) setLoading(true);
     setError("");
@@ -53,10 +56,9 @@ const TaskListScreen = ({ navigation }) => {
     }
   };
 
-  // Refresh every time screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      fetchTasks();
+      fetchTasks(true); // silent fetch on focus to not disrupt UI unless hard refresh requested
     }, [])
   );
 
@@ -65,7 +67,6 @@ const TaskListScreen = ({ navigation }) => {
     fetchTasks(true);
   };
 
-  // Filter + search
   const filteredTasks = allTasks.filter((task) => {
     const statusMatch =
       !FILTER_STATUS_MAP[activeFilter] ||
@@ -76,59 +77,61 @@ const TaskListScreen = ({ navigation }) => {
     return statusMatch && searchMatch;
   });
 
-  if (loading) return <LoadingScreen text="Loading tasks…" />;
+  if (loading) return <LoadingScreen text="Fetching your tasks…" />;
 
   return (
     <SafeAreaView style={styles.screen}>
-      <AppHeader title={isAdmin ? "All Tasks" : "My Tasks"} />
+      <AppHeader title="Tasks" subtitle={isAdmin ? "All company tasks" : "Assigned to you"} />
 
-      {/* Search bar */}
-      <View style={styles.searchRow}>
-        <Ionicons name="search-outline" size={18} color={theme.colors.subtext} style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search tasks…"
-          placeholderTextColor={theme.colors.subtext}
-          value={search}
-          onChangeText={setSearch}
-          clearButtonMode="while-editing"
-        />
+      {/* Top Bar: Search & Filter */}
+      <View style={styles.topBar}>
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={18} color={theme.colors.subtext} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search tasks…"
+            placeholderTextColor={theme.colors.subtext}
+            value={search}
+            onChangeText={setSearch}
+            clearButtonMode="while-editing"
+          />
+        </View>
+
+        <View style={styles.filterScrollerWrap}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+            {FILTERS.map((f) => {
+              const isActive = activeFilter === f;
+              return (
+                <TouchableOpacity
+                  key={f}
+                  style={[styles.pill, isActive && styles.pillActive]}
+                  onPress={() => setActiveFilter(f)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.pillText, isActive && styles.pillTextActive]}>
+                    {f}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
       </View>
 
-      {/* Filter pills */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterBar}
-      >
-        {FILTERS.map((f) => (
-          <TouchableOpacity
-            key={f}
-            style={[styles.pill, activeFilter === f && styles.pillActive]}
-            onPress={() => setActiveFilter(f)}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={[
-                styles.pillText,
-                activeFilter === f && styles.pillTextActive,
-              ]}
-            >
-              {f}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {error ? (
+        <View style={styles.errorWrap}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : null}
 
       <FlatList
         data={filteredTasks}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <TaskCard
             task={item}
+            index={index}
             showAssignee={isAdmin}
             onPress={() => navigation.navigate("TaskDetail", { taskId: item._id })}
           />
@@ -138,18 +141,19 @@ const TaskListScreen = ({ navigation }) => {
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={theme.colors.primary}
+            colors={[theme.colors.primary]}
           />
         }
         ListEmptyComponent={
           <EmptyState
-            icon="clipboard-outline"
+            icon="document-text-outline"
             title="No tasks found"
             subtitle={
               search
                 ? "Try a different search term."
                 : activeFilter !== "All"
-                ? `No ${activeFilter.toLowerCase()} tasks.`
-                : "Tasks assigned to you will appear here."
+                ? `No ${activeFilter.toLowerCase()} tasks match.`
+                : "Good job! Zero tasks right now."
             }
           />
         }
@@ -163,50 +167,71 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  searchRow: {
+  topBar: {
+    paddingVertical: theme.spacing.sm,
+    backgroundColor: theme.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.surfaceLight,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.borderRadius.md,
+    borderColor: theme.colors.borderLight,
+    borderRadius: theme.borderRadius.full,
     marginHorizontal: theme.spacing.md,
-    marginTop: theme.spacing.md,
-    paddingHorizontal: theme.spacing.sm,
+    marginBottom: theme.spacing.md,
   },
-  searchIcon: { marginRight: theme.spacing.xs },
+  searchIcon: {
+    paddingLeft: theme.spacing.md,
+  },
   searchInput: {
     flex: 1,
     color: theme.colors.text,
     fontSize: theme.fontSize.md,
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: 10,
+    paddingHorizontal: theme.spacing.sm,
   },
-  filterBar: {
+  filterScrollerWrap: {
+    height: 36,
+  },
+  filterScroll: {
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
     gap: theme.spacing.sm,
   },
   pill: {
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.background,
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.borderRadius.lg,
+    paddingVertical: 6,
+    borderRadius: theme.borderRadius.full,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    justifyContent: "center",
   },
-  pillActive: { backgroundColor: theme.colors.primary },
+  pillActive: { 
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primaryDark,
+  },
   pillText: {
-    color: theme.colors.subtext,
+    color: theme.colors.textMuted,
     fontSize: theme.fontSize.sm,
-    fontWeight: "500",
+    fontWeight: theme.fontWeight.medium,
   },
-  pillTextActive: { color: "#fff" },
+  pillTextActive: { color: "#fff", fontWeight: theme.fontWeight.semibold },
   list: {
     padding: theme.spacing.md,
-    paddingBottom: theme.spacing.xl,
+    paddingBottom: theme.spacing.xxl * 2,
+  },
+  errorWrap: {
+    margin: theme.spacing.md,
+    padding: theme.spacing.sm,
+    backgroundColor: theme.colors.errorGlow,
+    borderRadius: theme.borderRadius.md,
   },
   errorText: {
     color: theme.colors.error,
     textAlign: "center",
-    margin: theme.spacing.md,
     fontSize: theme.fontSize.sm,
   },
 });

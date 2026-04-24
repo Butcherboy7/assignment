@@ -1,138 +1,129 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  SafeAreaView,
-} from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { users as usersApi, getErrorMessage } from "../services/api";
 import AppHeader from "../components/AppHeader";
 import LoadingScreen from "../components/LoadingScreen";
 import EmptyState from "../components/EmptyState";
 import theme from "../theme";
 
-const getInitials = (name = "") =>
-  name
-    .split(" ")
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
-
-const UserCard = ({ user }) => (
-  <View style={styles.card}>
-    <View style={styles.avatar}>
-      <Text style={styles.avatarText}>{getInitials(user.name)}</Text>
-    </View>
-    <View style={styles.info}>
-      <Text style={styles.name}>{user.name}</Text>
-      <Text style={styles.email}>{user.email}</Text>
-    </View>
-    <View
-      style={[
-        styles.roleBadge,
-        user.role === "admin" ? styles.roleAdmin : styles.roleUser,
-      ]}
-    >
-      <Text
-        style={[
-          styles.roleText,
-          user.role === "admin" ? styles.roleTextAdmin : styles.roleTextUser,
-        ]}
-      >
-        {user.role === "admin" ? "Admin" : "User"}
-      </Text>
-    </View>
-  </View>
-);
-
 const ManageUsersScreen = () => {
-  const [userList, setUserList] = useState([]);
+  const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const res = await usersApi.getAll();
-        setUserList(res.data.data);
-      } catch (err) {
-        setError(getErrorMessage(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
-  }, []);
+  const fetchUsers = async () => {
+    setError("");
+    try {
+      const res = await usersApi.getAll();
+      setUsersList(res.data.data);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
-  if (loading) return <LoadingScreen text="Loading users…" />;
+  useFocusEffect(
+    useCallback(() => {
+      fetchUsers();
+    }, [])
+  );
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchUsers();
+  };
+
+  if (loading) return <LoadingScreen text="Loading team members…" />;
+
+  const renderItem = ({ item }) => {
+    const isAd = item.role === "admin";
+    const initials = item.name.substring(0, 2).toUpperCase();
+
+    return (
+      <View style={styles.card}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{initials}</Text>
+        </View>
+        <View style={styles.info}>
+          <Text style={styles.name}>{item.name}</Text>
+          <Text style={styles.email}>{item.email}</Text>
+        </View>
+        <View style={[styles.badge, isAd ? styles.badgeAdmin : styles.badgeUser]}>
+          {isAd && <Ionicons name="shield" size={10} color={theme.colors.primary} style={{marginRight: 4}}/>}
+          <Text style={[styles.badgeText, isAd ? styles.badgeTextAdmin : styles.badgeTextUser]}>
+            {isAd ? "Admin" : "User"}
+          </Text>
+        </View>
+      </View>
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.screen}>
-      <AppHeader title="Manage Users" subtitle={`${userList.length} members`} />
-      {error ? (
-        <Text style={styles.errorText}>{error}</Text>
-      ) : (
-        <FlatList
-          data={userList}
-          keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => <UserCard user={item} />}
-          ListEmptyComponent={
-            <EmptyState
-              icon="people-outline"
-              title="No users found"
-              subtitle="Users will appear here once added."
-            />
-          }
-        />
-      )}
-    </SafeAreaView>
+    <View style={styles.screen}>
+      <AppHeader title="Team Members" subtitle={`${usersList.length} total members`} />
+      
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
+      <FlatList
+        data={usersList}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={styles.list}
+        renderItem={renderItem}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
+        ListEmptyComponent={<EmptyState icon="people" title="No users found" />}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.background },
   list: { padding: theme.spacing.md },
-  errorText: {
-    color: theme.colors.error,
-    textAlign: "center",
-    margin: theme.spacing.md,
-  },
   card: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.spacing.md,
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   avatar: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.surfaceLight,
     alignItems: "center",
     justifyContent: "center",
+    marginRight: theme.spacing.md,
   },
-  avatarText: { color: "#fff", fontWeight: "bold", fontSize: theme.fontSize.md },
+  avatarText: {
+    color: theme.colors.textMuted,
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.bold,
+  },
   info: { flex: 1 },
-  name: { color: theme.colors.text, fontSize: theme.fontSize.md, fontWeight: "600" },
+  name: { color: theme.colors.text, fontSize: theme.fontSize.md, fontWeight: theme.fontWeight.bold },
   email: { color: theme.colors.subtext, fontSize: theme.fontSize.sm, marginTop: 2 },
-  roleBadge: {
-    paddingHorizontal: theme.spacing.sm,
+  badge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: theme.borderRadius.lg,
+    borderRadius: theme.borderRadius.full,
   },
-  roleAdmin: { backgroundColor: theme.colors.primary + "33" },
-  roleUser: { borderWidth: 1, borderColor: theme.colors.border },
-  roleText: { fontSize: theme.fontSize.sm, fontWeight: "600" },
-  roleTextAdmin: { color: theme.colors.primary },
-  roleTextUser: { color: theme.colors.subtext },
+  badgeAdmin: { backgroundColor: theme.colors.primaryGlow },
+  badgeUser: { backgroundColor: theme.colors.surfaceLight },
+  badgeText: { fontSize: 11, fontWeight: theme.fontWeight.bold, textTransform: "uppercase" },
+  badgeTextAdmin: { color: theme.colors.primaryLight },
+  badgeTextUser: { color: theme.colors.subtext },
+  errorText: { color: theme.colors.error, textAlign: "center", margin: theme.spacing.md },
 });
 
 export default ManageUsersScreen;

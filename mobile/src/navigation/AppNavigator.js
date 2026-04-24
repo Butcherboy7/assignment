@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
+import { Platform } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
 import { setLogoutCallback } from "../services/api";
@@ -20,64 +21,51 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 const TaskStack = () => (
-  <Stack.Navigator
-    screenOptions={{
-      headerShown: false,
-      contentStyle: { backgroundColor: theme.colors.background },
-    }}
-  >
+  <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.colors.background } }}>
     <Stack.Screen name="TaskList" component={TaskListScreen} />
     <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
   </Stack.Navigator>
 );
 
+const getTabBarOptions = () => ({
+  headerShown: false,
+  tabBarStyle: {
+    backgroundColor: theme.colors.surface,
+    borderTopColor: theme.colors.border,
+    borderTopWidth: 1,
+    height: Platform.OS === 'ios' ? 88 : 64,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+    paddingTop: 10,
+  },
+  tabBarActiveTintColor: theme.colors.primaryLight,
+  tabBarInactiveTintColor: theme.colors.subtext,
+  tabBarLabelStyle: {
+    fontSize: 11,
+    fontWeight: theme.fontWeight.semibold,
+  },
+});
+
 const UserTabs = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      headerShown: false,
-      tabBarStyle: {
-        backgroundColor: theme.colors.surface,
-        borderTopColor: theme.colors.border,
-        borderTopWidth: 1,
-      },
-      tabBarActiveTintColor: theme.colors.primary,
-      tabBarInactiveTintColor: theme.colors.subtext,
-      tabBarIcon: ({ color, size }) => {
-        const icons = {
-          Tasks: "list-outline",
-          Profile: "person-outline",
-        };
-        return <Ionicons name={icons[route.name]} size={size} color={color} />;
-      },
-    })}
-  >
+  <Tab.Navigator screenOptions={({ route }) => ({
+    ...getTabBarOptions(),
+    tabBarIcon: ({ color, size }) => {
+      const icons = { Tasks: "list", Profile: "person" };
+      return <Ionicons name={icons[route.name]} size={size} color={color} />;
+    },
+  })}>
     <Tab.Screen name="Tasks" component={TaskStack} />
     <Tab.Screen name="Profile" component={ProfileScreen} />
   </Tab.Navigator>
 );
 
 const AdminTabs = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      headerShown: false,
-      tabBarStyle: {
-        backgroundColor: theme.colors.surface,
-        borderTopColor: theme.colors.border,
-        borderTopWidth: 1,
-      },
-      tabBarActiveTintColor: theme.colors.primary,
-      tabBarInactiveTintColor: theme.colors.subtext,
-      tabBarIcon: ({ color, size }) => {
-        const icons = {
-          Tasks: "list-outline",
-          Create: "add-circle-outline",
-          Users: "people-outline",
-          Profile: "person-outline",
-        };
-        return <Ionicons name={icons[route.name]} size={size} color={color} />;
-      },
-    })}
-  >
+  <Tab.Navigator screenOptions={({ route }) => ({
+    ...getTabBarOptions(),
+    tabBarIcon: ({ color, size }) => {
+      const icons = { Tasks: "list", Create: "add-circle", Users: "people", Profile: "person" };
+      return <Ionicons name={icons[route.name]} size={size} color={color} />;
+    },
+  })}>
     <Tab.Screen name="Tasks" component={TaskStack} />
     <Tab.Screen name="Create" component={CreateTaskScreen} />
     <Tab.Screen name="Users" component={ManageUsersScreen} />
@@ -92,10 +80,10 @@ const AppNavigator = () => {
     setLogoutCallback(logout);
   }, [logout]);
 
-  if (isLoading) return <LoadingScreen />;
+  if (isLoading) return <LoadingScreen text="TaskFlow Workspace..." />;
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={{ colors: { background: theme.colors.background } }}>
       {!user ? (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login" component={LoginScreen} />

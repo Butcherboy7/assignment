@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,17 +9,29 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Animated,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../services/api";
 import theme from "../theme";
 
 const LoginScreen = () => {
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@test.com"); // Prep-filled for quick demo
+  const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const translateYAnim = useRef(new Animated.Value(40)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+      Animated.spring(translateYAnim, { toValue: 0, tension: 50, friction: 8, useNativeDriver: true }),
+    ]).start();
+  }, []);
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -33,66 +45,84 @@ const LoginScreen = () => {
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
-      setLoading(false);
+      if (loading) setLoading(false); // In case it throws and we don't unmount
     }
   };
 
   return (
     <View style={styles.screen}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.center}
-      >
+      <View style={styles.bgGlowTop} />
+      <View style={styles.bgGlowBottom} />
+      
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.center}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <View style={styles.card}>
-            {/* Logo */}
-            <Text style={styles.logo}>TaskFlow</Text>
-            <Text style={styles.subtitle}>Sign in to continue</Text>
+          
+          <Animated.View style={[styles.card, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}>
+            
+            <View style={styles.logoContainer}>
+              <View style={styles.logoIcon}>
+                <Ionicons name="checkmark-done" size={40} color="#fff" />
+              </View>
+              <Text style={styles.logoText}>TaskFlow</Text>
+            </View>
+            <Text style={styles.subtitle}>Sign in to your workspace</Text>
 
-            {/* Email */}
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="you@example.com"
-              placeholderTextColor={theme.colors.subtext}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!loading}
-            />
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Email Address</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="mail-outline" size={20} color={theme.colors.subtext} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="name@company.com"
+                  placeholderTextColor={theme.colors.subtext}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!loading}
+                />
+              </View>
+            </View>
 
-            {/* Password */}
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="••••••••"
-              placeholderTextColor={theme.colors.subtext}
-              secureTextEntry
-              editable={!loading}
-              onSubmitEditing={handleLogin}
-            />
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="lock-closed-outline" size={20} color={theme.colors.subtext} style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="••••••••"
+                  placeholderTextColor={theme.colors.subtext}
+                  secureTextEntry
+                  editable={!loading}
+                  onSubmitEditing={handleLogin}
+                />
+              </View>
+            </View>
 
-            {/* Error */}
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? (
+              <Animated.View style={styles.errorContainer}>
+                <Ionicons name="alert-circle" size={16} color={theme.colors.error} />
+                <Text style={styles.errorText}>{error}</Text>
+              </Animated.View>
+            ) : null}
 
-            {/* Button */}
             <TouchableOpacity
               style={[styles.button, loading && styles.buttonDisabled]}
               onPress={handleLogin}
               disabled={loading}
-              activeOpacity={0.85}
+              activeOpacity={0.8}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Sign In</Text>
+                <Text style={styles.buttonText}>Continue</Text>
               )}
             </TouchableOpacity>
-          </View>
+          </Animated.View>
+
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -104,6 +134,26 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  bgGlowTop: {
+    position: "absolute",
+    top: -100,
+    left: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: theme.colors.primaryGlow,
+    opacity: 0.6,
+  },
+  bgGlowBottom: {
+    position: "absolute",
+    bottom: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: theme.colors.accentGlow,
+    opacity: 0.6,
+  },
   center: { flex: 1 },
   scroll: {
     flexGrow: 1,
@@ -112,56 +162,93 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.lg,
+    borderRadius: theme.borderRadius.xl,
     padding: theme.spacing.xl,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadow.lg,
   },
-  logo: {
-    color: theme.colors.primary,
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: theme.spacing.sm,
+  },
+  logoIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 24,
+    backgroundColor: theme.colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: theme.spacing.md,
+    ...theme.shadow.md,
+  },
+  logoText: {
+    color: theme.colors.text,
     fontSize: theme.fontSize.xxl,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: theme.spacing.xs,
+    fontWeight: theme.fontWeight.extrabold,
+    letterSpacing: -0.5,
   },
   subtitle: {
     color: theme.colors.subtext,
     fontSize: theme.fontSize.md,
     textAlign: "center",
+    marginBottom: theme.spacing.xl,
+  },
+  inputGroup: {
     marginBottom: theme.spacing.lg,
   },
   label: {
-    color: theme.colors.subtext,
+    color: theme.colors.textMuted,
     fontSize: theme.fontSize.sm,
+    fontWeight: theme.fontWeight.medium,
     marginBottom: theme.spacing.xs,
-    marginTop: theme.spacing.sm,
   },
-  input: {
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: theme.colors.surfaceLight,
-    color: theme.colors.text,
     borderWidth: 1,
     borderColor: theme.colors.border,
     borderRadius: theme.borderRadius.md,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.md,
-    fontSize: theme.fontSize.md,
+    overflow: "hidden",
   },
-  error: {
+  inputIcon: {
+    paddingLeft: theme.spacing.md,
+  },
+  input: {
+    flex: 1,
+    color: theme.colors.text,
+    fontSize: theme.fontSize.md,
+    paddingVertical: Platform.OS === "ios" ? 14 : 10,
+    paddingHorizontal: theme.spacing.sm,
+  },
+  errorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.errorGlow,
+    padding: theme.spacing.sm,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.md,
+  },
+  errorText: {
     color: theme.colors.error,
     fontSize: theme.fontSize.sm,
-    marginTop: theme.spacing.sm,
-    textAlign: "center",
+    marginLeft: 6,
+    flex: 1,
   },
   button: {
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.md,
-    paddingVertical: theme.spacing.md,
+    paddingVertical: 14,
     alignItems: "center",
-    marginTop: theme.spacing.lg,
+    marginTop: theme.spacing.sm,
+    ...theme.shadow.md,
   },
-  buttonDisabled: { opacity: 0.6 },
+  buttonDisabled: { opacity: 0.7 },
   buttonText: {
     color: "#fff",
-    fontSize: theme.fontSize.md,
-    fontWeight: "bold",
+    fontSize: theme.fontSize.lg,
+    fontWeight: theme.fontWeight.bold,
   },
 });
 

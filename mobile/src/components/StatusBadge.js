@@ -1,34 +1,51 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import theme from "../theme";
 
-const STATUS_LABELS = {
-  pending: "Pending",
+// Normalize status label for display
+const STATUS_LABEL = {
+  pending:      "Pending",
   "in-progress": "In Progress",
-  completed: "Completed",
+  completed:    "Completed",
+};
+
+const STATUS_DOT = {
+  pending:      "●",
+  "in-progress": "●",
+  completed:    "●",
 };
 
 const StatusBadge = ({ status }) => {
-  const color = theme.colors.status[status] || theme.colors.subtext;
-  const label = STATUS_LABELS[status] || status;
+  const color  = theme.colors.status[status]  || theme.colors.subtext;
+  const bgColor= theme.colors.statusBg[status]|| theme.colors.surfaceLight;
 
   return (
-    <View style={[styles.badge, { backgroundColor: color + "33" }]}>
-      <Text style={[styles.text, { color }]}>{label}</Text>
+    <View style={[styles.badge, { backgroundColor: bgColor }]}>
+      <Text style={[styles.dot, { color }]}>{STATUS_DOT[status] || "●"}</Text>
+      <Text style={[styles.label, { color }]}>
+        {STATUS_LABEL[status] || status}
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   badge: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: 3,
-    borderRadius: theme.borderRadius.lg,
-    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: theme.borderRadius.full,
+    gap: 4,
   },
-  text: {
-    fontSize: theme.fontSize.sm,
-    fontWeight: "500",
+  dot: {
+    fontSize: 7,
+    lineHeight: Platform.OS === "ios" ? 13 : 14,
+  },
+  label: {
+    fontSize: theme.fontSize.xs,
+    fontWeight: "600",
+    letterSpacing: 0.3,
   },
 });
 

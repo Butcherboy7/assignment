@@ -1,5 +1,12 @@
-import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import React, { useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Animated,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import theme from "../theme";
 import StatusBadge from "./StatusBadge";
 import PriorityBadge from "./PriorityBadge";
@@ -7,96 +14,183 @@ import PriorityBadge from "./PriorityBadge";
 const formatDate = (dateStr) => {
   if (!dateStr) return null;
   const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
-const TaskCard = ({ task, onPress, showAssignee = false }) => {
+const TaskCard = ({ task, onPress, showAssignee = false, index = 0 }) => {
   const statusColor = theme.colors.status[task.status] || theme.colors.border;
+  const scale = useRef(new Animated.Value(1)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 350,
+        delay: index * 60,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 80,
+        friction: 10,
+        delay: index * 60,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const onPressIn = () =>
+    Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 50 }).start();
+
+  const onPressOut = () =>
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 50 }).start();
+
+  const isOverdue =
+    task.dueDate &&
+    task.status !== "completed" &&
+    new Date(task.dueDate) < new Date();
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+    <Animated.View
+      style={[
+        styles.wrapper,
+        {
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }, { scale }],
+        },
+      ]}
     >
-      <View style={[styles.leftBorder, { backgroundColor: statusColor }]} />
-      <View style={styles.content}>
-        {/* Row 1: Title + Priority */}
-        <View style={styles.row}>
-          <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
-            {task.title}
-          </Text>
-          <PriorityBadge priority={task.priority} />
-        </View>
+      <Pressable
+        onPress={onPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        style={styles.card}
+      >
+        {/* Colored left accent bar */}
+        <View style={[styles.accent, { backgroundColor: statusColor }]} />
 
-        {/* Row 2: Description */}
-        {task.description ? (
-          <Text style={styles.description} numberOfLines={2}>
-            {task.description}
-          </Text>
-        ) : null}
+        <View style={styles.content}>
+          {/* Title row */}
+          <View style={styles.titleRow}>
+            <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+              {task.title}
+            </Text>
+            <PriorityBadge priority={task.priority} />
+          </View>
 
-        {/* Row 3: Status + assignee + due date */}
-        <View style={[styles.row, styles.footer]}>
-          <StatusBadge status={task.status} />
-          <View style={styles.metaRight}>
-            {showAssignee && task.assignedTo?.name ? (
-              <Text style={styles.meta}>{task.assignedTo.name}</Text>
-            ) : null}
-            {task.dueDate ? (
-              <Text style={styles.meta}>{formatDate(task.dueDate)}</Text>
-            ) : null}
+          {/* Description */}
+          {task.description ? (
+            <Text style={styles.description} numberOfLines={2}>
+              {task.description}
+            </Text>
+          ) : null}
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <StatusBadge status={task.status} />
+
+            <View style={styles.metaRow}>
+              {showAssignee && task.assignedTo?.name ? (
+                <View style={styles.chip}>
+                  <Ionicons
+                    name="person-outline"
+                    size={10}
+                    color={theme.colors.subtext}
+                    style={{ marginRight: 3 }}
+                  />
+                  <Text style={styles.chipText}>{task.assignedTo.name}</Text>
+                </View>
+              ) : null}
+
+              {task.dueDate ? (
+                <View style={[styles.chip, isOverdue && styles.chipOverdue]}>
+                  <Ionicons
+                    name="calendar-outline"
+                    size={10}
+                    color={isOverdue ? theme.colors.error : theme.colors.subtext}
+                    style={{ marginRight: 3 }}
+                  />
+                  <Text style={[styles.chipText, isOverdue && styles.chipTextOverdue]}>
+                    {formatDate(task.dueDate)}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
           </View>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: theme.spacing.sm,
+  },
   card: {
     flexDirection: "row",
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
-    marginBottom: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
     overflow: "hidden",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
+    ...theme.shadow.sm,
   },
-  pressed: { opacity: 0.8 },
-  leftBorder: { width: 3 },
+  accent: {
+    width: 4,
+    minHeight: 60,
+  },
   content: {
     flex: 1,
     padding: theme.spacing.md,
-    gap: theme.spacing.xs,
+    gap: 6,
   },
-  row: {
+  titleRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    gap: theme.spacing.sm,
   },
   title: {
     flex: 1,
     color: theme.colors.text,
-    fontSize: theme.fontSize.lg,
+    fontSize: theme.fontSize.md,
     fontWeight: "600",
-    marginRight: theme.spacing.sm,
   },
   description: {
     color: theme.colors.subtext,
     fontSize: theme.fontSize.sm,
     lineHeight: 18,
   },
-  footer: { marginTop: theme.spacing.xs },
-  metaRight: {
-    alignItems: "flex-end",
-    gap: 2,
+  footer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 4,
   },
-  meta: {
+  metaRow: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.surfaceLight,
+    borderRadius: theme.borderRadius.full,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  chipOverdue: {
+    backgroundColor: theme.colors.errorGlow,
+  },
+  chipText: {
     color: theme.colors.subtext,
-    fontSize: theme.fontSize.sm,
+    fontSize: theme.fontSize.xs,
+  },
+  chipTextOverdue: {
+    color: theme.colors.error,
   },
 });
 

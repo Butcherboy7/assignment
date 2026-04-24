@@ -1,13 +1,41 @@
-import React from "react";
-import { View, ActivityIndicator, Text, StyleSheet } from "react-native";
+import React, { useRef, useEffect } from "react";
+import { View, Text, Animated, StyleSheet } from "react-native";
 import theme from "../theme";
 
-const LoadingScreen = ({ text }) => (
-  <View style={styles.container}>
-    <ActivityIndicator size="large" color={theme.colors.primary} />
-    {text ? <Text style={styles.text}>{text}</Text> : null}
-  </View>
-);
+const LoadingScreen = ({ text = "Loading…" }) => {
+  const pulse = useRef(new Animated.Value(0.4)).current;
+  const rotate = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Pulsing dots
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.4, duration: 600, useNativeDriver: true }),
+      ])
+    ).start();
+
+    // Spinning ring
+    Animated.loop(
+      Animated.timing(rotate, { toValue: 1, duration: 900, useNativeDriver: true })
+    ).start();
+  }, []);
+
+  const spin = rotate.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.spinnerWrapper}>
+        <Animated.View style={[styles.ring, { transform: [{ rotate: spin }] }]} />
+        <View style={styles.innerDot} />
+      </View>
+      <Animated.Text style={[styles.text, { opacity: pulse }]}>{text}</Animated.Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -15,11 +43,33 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     justifyContent: "center",
     alignItems: "center",
+    gap: theme.spacing.md,
+  },
+  spinnerWrapper: {
+    width: 48,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ring: {
+    position: "absolute",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 3,
+    borderColor: theme.colors.primary,
+    borderTopColor: "transparent",
+  },
+  innerDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: theme.colors.primaryLight,
   },
   text: {
-    marginTop: theme.spacing.md,
     color: theme.colors.subtext,
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.sm,
+    letterSpacing: 0.5,
   },
 });
 
