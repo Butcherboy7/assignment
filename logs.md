@@ -105,3 +105,21 @@
 
 ### Root
 `.gitignore`, `handoff.md`, `decisions.md`, `logs.md`
+
+### Phase 7: UI/UX Overhaul & Web Deploy (V2)
+
+| Time | Action |
+|---|---|
+| 04:30 | Captured Expo Go tunnel URL and verified physical device testing instructions |
+| 04:40 | Created new branch `feat/ui-polish-web` |
+| 04:41 | Overhauled `theme.js` with deep blacks, glows, and shadow scales |
+| 04:42 | Rewrote `TaskCard.js`, `AppHeader.js`, and Badges (V2 layout + spring animations) |
+| 04:43 | Rewrote all 6 screens with fully responsive glassmorphic layouts & `Animated.timing` |
+| 04:45 | Installed `react-native-web react-dom @expo/metro-runtime` for single-click browser deploys |
+| 04:46 | Rewrote `README.md` to highlight immediate web-testing instructions without an APK/app |
+| 04:48 | Deployed `npx expo start --web` on port 8081 |
+| 04:50 | Captured browser UI via `browser_subagent` and verified layout (discovered minor native web parsing issue on bottom tabs) |
+| 04:55 | Pushed all V2 code to GitHub branch |
+| 04:57 | Ran `/recap` and synced `decisions.md` & `handoff.md` with new status |
+
+---
