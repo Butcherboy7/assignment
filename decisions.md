@@ -41,3 +41,12 @@
 ### 10. Status Color on TaskCard Left Border
 - **Decision**: 3px left border uses status color instead of priority color.
 - **Rationale**: Status changes more frequently and is the primary information users need to scan — priority is shown via badge on the right.
+
+### 11. Expo Web Support (react-native-web)
+- **Decision**: Added `react-native-web` and `@expo/metro-runtime` to allow single-command web demos (`npx expo start --web`).
+- **Rationale**: Enables potential clients or reviewers to test out the full application instantaneously in their browser without downloading Expo Go or dealing with local network/firewall configuration headaches.
+
+### 12. Animated UI/UX Overhaul (V2)
+- **Decision**: Replaced all stock components with animated, glassmorphic UI elements featuring staggered slide-ups, custom loading spinners, glowing absolute accents, and `Ionicons`.
+- **Rationale**: Transforms the app from a "functional MVP" into a "premium product." Fluid interactions mask minor network delays and create a high-quality "WOW" factor immediately on login.
+

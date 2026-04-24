@@ -228,10 +228,12 @@ npx expo start
 - [x] Mobile: Auth context + JWT persistence
 - [x] Mobile: Role-gated navigation (user 2 tabs, admin 4 tabs)
 - [x] Mobile: All 6 screens built
-- [x] Mobile: All components built
-- [x] GitHub: Code pushed to main branch
+- [x] API: 16/16 endpoint tests passing
+- [x] CI/CD: eas.json configured for APK preview build
+- [x] **Web Support:** Installed `react-native-web` for instantaneous browser demoing
+- [x] **UI/UX V2:** Overhauled all components with deep dark mode, glassmorphic glows, and staggered animations.
 
-## Next Steps
-1. Set local IP in `mobile/.env`
-2. Run both backend and mobile
-3. Test with Expo Go on your phone
+## Next Steps (Tomorrow)
+1. Fix the `<BottomTabItem>` crash occurring specifically on the Web platform after login (likely an icon/navigation conflict).
+2. Code review the UI changes and fine-tune any mismatched paddings across iOS/Android/Web bounds.
+3. Test the built APK on a physical Android device.
