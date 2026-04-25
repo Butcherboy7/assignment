@@ -34,7 +34,7 @@ const getTabBarOptions = () => ({
     borderTopColor: theme.colors.border,
     borderTopWidth: 1,
     height: Platform.OS === 'ios' ? 88 : 64,
-    paddingBottom: Platform.OS === 'ios' ? 28 : 10,
+    paddingBottom: Platform.OS === 'android' ? 8 : (Platform.OS === 'ios' ? 28 : 0),
     paddingTop: 10,
   },
   tabBarActiveTintColor: theme.colors.primaryLight,

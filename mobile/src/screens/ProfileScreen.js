@@ -5,8 +5,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import AppHeader from "../components/AppHeader";
@@ -26,11 +26,11 @@ const ProfileScreen = () => {
   const isAdmin = user.role === "admin";
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <AppHeader title="Profile" rightIcon="log-out-outline" onRight={logout} />
-      
+
       <ScrollView contentContainerStyle={styles.scroll}>
-        
+
         {/* Avatar Card */}
         <View style={styles.card}>
           <View style={styles.avatar}>
@@ -38,9 +38,9 @@ const ProfileScreen = () => {
           </View>
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
-          
+
           <View style={[styles.rolePill, isAdmin ? styles.rolePillAdmin : styles.rolePillUser]}>
-            {isAdmin && <Ionicons name="shield-checkmark" size={14} color={theme.colors.primary} style={{marginRight: 4}}/>}
+            {isAdmin && <Ionicons name="shield-checkmark" size={14} color={theme.colors.primary} style={{ marginRight: 4 }} />}
             <Text style={[styles.rolePillText, isAdmin ? styles.roleAdminText : styles.roleUserText]}>
               {isAdmin ? "Workspace Admin" : "Team Member"}
             </Text>
@@ -80,7 +80,7 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.background },
   scroll: { padding: theme.spacing.md },
-  
+
   card: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.lg,

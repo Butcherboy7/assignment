@@ -8,12 +8,13 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
+import Toast from "react-native-toast-message";
 import { useAuth } from "../context/AuthContext";
 import { tasks as tasksApi, users as usersApi, getErrorMessage } from "../services/api";
 import StatusBadge from "../components/StatusBadge";
@@ -102,6 +103,23 @@ const TaskDetailScreen = ({ route, navigation }) => {
     try {
       await tasksApi.update(taskId, { status: newStatus });
       await fetchTask();
+      if (newStatus === "in-progress") {
+        Toast.show({
+          type: "info",
+          text1: "Task updated",
+          text2: "Marked as in progress",
+          position: "bottom",
+          visibilityTime: 2500,
+        });
+      } else if (newStatus === "completed") {
+        Toast.show({
+          type: "success",
+          text1: "Task completed",
+          text2: "Great work!",
+          position: "bottom",
+          visibilityTime: 2500,
+        });
+      }
     } catch (err) {
       Alert.alert("Error", getErrorMessage(err));
     } finally {
@@ -153,7 +171,7 @@ const TaskDetailScreen = ({ route, navigation }) => {
   const isOverdue = task.dueDate && task.status !== "completed" && new Date(task.dueDate) < new Date();
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
       <AppHeader
         title={editing ? "Edit Task" : "Task Details"}
         showBack={true}
@@ -291,7 +309,7 @@ const TaskDetailScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: theme.colors.background },
   scroll: { padding: theme.spacing.md, paddingBottom: 120 },
-  
+
   // View Details Mode
   content: { gap: theme.spacing.md },
   titleCard: {
@@ -339,7 +357,7 @@ const styles = StyleSheet.create({
   infoLabel: { color: theme.colors.subtext, fontSize: theme.fontSize.sm, fontWeight: theme.fontWeight.medium },
   infoValue: { fontSize: theme.fontSize.md, fontWeight: theme.fontWeight.medium, maxWidth: '50%' },
   divider: { height: 1, backgroundColor: theme.colors.border, marginVertical: 4 },
-  
+
   editFloatBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -409,7 +427,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: theme.colors.surfaceRaised,
     padding: theme.spacing.lg,
-    paddingBottom: Platform.OS === 'ios' ? 40 : theme.spacing.lg,
+    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
     gap: theme.spacing.md,
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,

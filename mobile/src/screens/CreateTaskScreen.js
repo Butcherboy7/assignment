@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { tasks as tasksApi, users as usersApi, getErrorMessage } from "../services/api";
@@ -72,12 +73,12 @@ const CreateTaskScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <AppHeader title="New Task" subtitle="Create and assign to a team member" />
 
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scroll}>
-          
+
           <View style={styles.formCard}>
             <Text style={styles.label}>Task Title</Text>
             <View style={styles.inputContainer}>
@@ -161,10 +162,10 @@ const CreateTaskScreen = ({ navigation }) => {
               )}
             </TouchableOpacity>
           </View>
-          
+
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 };
 

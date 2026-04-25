@@ -118,6 +118,8 @@ const TaskCard = ({ task, onPress, showAssignee = false, index = 0 }) => {
                 </View>
               ) : null}
             </View>
+
+            <Ionicons name="chevron-forward" size={14} color="#475569" />
           </View>
         </View>
       </Pressable>

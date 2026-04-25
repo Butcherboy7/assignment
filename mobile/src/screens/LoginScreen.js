@@ -11,6 +11,7 @@ import {
   ScrollView,
   Animated,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import { getErrorMessage } from "../services/api";
@@ -50,15 +51,15 @@ const LoginScreen = () => {
   };
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
       <View style={styles.bgGlowTop} />
       <View style={styles.bgGlowBottom} />
-      
+
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.center}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          
+
           <Animated.View style={[styles.card, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}>
-            
+
             <View style={styles.logoContainer}>
               <View style={styles.logoIcon}>
                 <Ionicons name="checkmark-done" size={40} color="#fff" />
@@ -125,7 +126,7 @@ const LoginScreen = () => {
 
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 };
 

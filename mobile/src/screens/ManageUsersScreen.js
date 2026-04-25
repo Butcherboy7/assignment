@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, FlatList, StyleSheet, RefreshControl } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { users as usersApi, getErrorMessage } from "../services/api";
@@ -54,7 +55,7 @@ const ManageUsersScreen = () => {
           <Text style={styles.email}>{item.email}</Text>
         </View>
         <View style={[styles.badge, isAd ? styles.badgeAdmin : styles.badgeUser]}>
-          {isAd && <Ionicons name="shield" size={10} color={theme.colors.primary} style={{marginRight: 4}}/>}
+          {isAd && <Ionicons name="shield" size={10} color={theme.colors.primary} style={{ marginRight: 4 }} />}
           <Text style={[styles.badgeText, isAd ? styles.badgeTextAdmin : styles.badgeTextUser]}>
             {isAd ? "Admin" : "User"}
           </Text>
@@ -64,9 +65,9 @@ const ManageUsersScreen = () => {
   };
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <AppHeader title="Team Members" subtitle={`${usersList.length} total members`} />
-      
+
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
       <FlatList
@@ -77,7 +78,7 @@ const ManageUsersScreen = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />}
         ListEmptyComponent={<EmptyState icon="people" title="No users found" />}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

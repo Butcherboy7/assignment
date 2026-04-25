@@ -1,112 +1,91 @@
-# TaskFlow — Role-Based Task Manager
+# TaskFlow
 
-A stunning, fully-animated task management application with **role-based access control (RBAC)**.  
-Backend: Node.js + Express + MongoDB Atlas  
-Frontend: React Native (Expo SDK 54) + Web Support
+## Overview
+TaskFlow is a robust, role-based task management system designed to streamline team collaboration. It provides a seamless experience for administrators to orchestrate tasks and for users to track their assignments.
 
----
+## Tech Stack
+Backend: Node.js, Express, MongoDB, Mongoose, JWT, bcrypt, express-rate-limit
+Mobile: Expo, React Navigation, Axios, AsyncStorage, react-native-toast-message
 
-## 🔥 Run the Live Web Demo (Easiest Way!)
+## Getting Started
 
-You don't need a phone or APK to test the app! Expo supports running the mobile app directly in your browser.
+### Prerequisites
+- Node.js 18+
+- MongoDB Atlas account or local MongoDB
+- Expo Go app on your phone OR Android/iOS emulator
 
-**1. Start the Backend** (keep this terminal open)
-```bash
-cd backend
-npm install
-node seed.js  # skip if already seeded
-npm run dev
-```
+### Backend Setup
+1. Open a terminal and navigate to the `backend` folder.
+2. Run `npm install` to install the required dependencies.
+3. Verify that the `.env` file exists and contains the `PORT`, `MONGO_URI`, and `JWT_SECRET`.
+4. Run `npm start` (or `npm run dev`) to start the server at `http://localhost:5000`.
 
-**2. Start the Frontend (Web Mode)**
-Open a **new** terminal:
-```bash
-cd mobile
-npm install
+### Mobile Setup
+1. Open a new terminal and navigate to the `mobile` folder.
+2. Run `npm install` to install all Expo and React Native dependencies.
+3. Open or create the `.env` file in the `mobile` directory. Set `EXPO_PUBLIC_API_URL=http://YOUR_LOCAL_IP:5000` (Use `ipconfig` or `ifconfig` to find your machine's local IPv4 address).
+4. Run `npx expo start` to start the Expo bundler.
+5. Scan the QR code using the Expo Go app on your phone to run the application.
 
-# Run the web version!
-npx expo start --web
-```
-*Your browser will automatically open to `http://localhost:8081` showing the fully-functional mobile app adapted for web!*
-
----
-
-## 📱 Running on iOS or Android (Via Expo Go)
-
-If you prefer testing on your physical phone, follow these exact steps:
-
-**1. Set your backend IP**
-Your phone needs to connect to your PC. Open `mobile/.env` and ensure it uses your exact PC network IP (e.g., `192.168.0.104`):
-```env
-EXPO_PUBLIC_API_URL=http://YOUR_LOCAL_IP:5000
-```
-> *To find your IP on Windows:* open Command Prompt, type `ipconfig`, look for `IPv4 Address`.
-
-**2. Start the Tunnel**
-Instead of a standard start, we will use a **tunnel** to bypass firewall/LAN issues.
-```bash
-cd mobile
-npx expo start --tunnel
-```
-
-**3. Test on Phone**
-- Download **Expo Go** from the iOS App Store or Google Play.
-- **Android:** Scan the QR code in the terminal using your camera.
-- **iOS:** In the terminal, look for the `exp://` link. Open the Expo Go app, tap "Enter URL manually," and paste that link in!
-
----
-
-## 🔑 Test Credentials (ready to use)
-
-The database is pre-seeded with these users. Try both to see the different dashboards!
-
-| Email | Password | What they see |
+### Seed Data
+Run `node seed.js` from the /backend folder.
+This creates:
+| Email | Password | Role |
 |---|---|---|
-| `admin@test.com` | `admin123` | **Admin Dashboard:** 4 tabs. Can see everyone's tasks, create new tasks, reassign, and manage team members. |
-| `user1@test.com` | `user123` | **User Dashboard:** 2 tabs. Only sees tasks assigned specifically to them. Can only change task status. |
-| `user2@test.com` | `user123` | *Same as user1* |
+| `admin@test.com` | `admin123` | admin |
+| `user1@test.com` | `user123` | user |
+| `user2@test.com` | `user123` | user |
+| `user3@test.com` | `user123` | user |
 
----
+## Features
+### Admin
+- [x] Can view all tasks with assignee names
+- [x] Can create and assign new tasks to specific users
+- [x] Can edit an existing task's title, description, and status
+- [x] Can delete a task with a confirmation alert
+- [x] Can view all registered users under the 'Users' tab
+- [x] Experiences 4 exclusive tabs for comprehensive management
 
-## ✨ Features & UI Upgrades (v2)
+### User
+- [x] Can only see tasks actively assigned to them
+- [x] Can update their task status to "in-progress" or "completed"
+- [x] Cannot modify any task attribute outside of status
+- [x] Experiences 2 streamlined tabs for focused work
+- [x] Cannot view tasks belonging to other users
 
-- **Complete Re-design:** Deep dark mode with violet/cyan glows, glassmorphic inputs, and premium typography.
-- **Animations:** 
-  - Staggered slide-in & fade list animations.
-  - Scale & spring animations on interactions.
-  - Custom pulsing/spinning loading screens.
-- **Responsive:** Adapts beautifully to Web, iOS, and Android.
-- **Full RBAC:** Secure backend routes + conditional frontend rendering based on `admin` vs `user` roles.
-- **Robust Auth:** JWT tokens stored securely, auto-rehydration on refresh, instant feedback on wrong passwords.
-
----
-
-## 🏗️ Building the Android APK (Production)
-
-To create a standalone `.apk` you can install without Expo Go:
-
-```bash
-cd mobile
-npm install -g eas-cli
-eas login
-eas build --platform android --profile preview
+## Project Structure
 ```
-*Wait ~10 minutes. Click the resulting Expo URL to download the APK straight to your phone.*
+├── backend/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── .env
+│   ├── seed.js
+│   └── server.js
+└── mobile/
+    ├── src/
+    │   ├── components/
+    │   ├── context/
+    │   ├── navigation/
+    │   ├── screens/
+    │   ├── services/
+    │   └── theme.js
+    ├── .env
+    ├── app.json
+    └── App.js
+```
 
----
+## Security Notes
+- Passwords hashed with bcrypt (10 rounds)
+- JWT authentication, 7 day expiry
+- Role enforcement in middleware layer
+- Input whitelisting on all update operations
+- Rate limiting on login endpoint (10 attempts per 15 minutes)
+- CORS open for development — restrict origins in production
 
-## 💻 API Endpoints (Backend)
-
-Base URL: `http://localhost:5000/api`
-
-| Method | Route              | Auth | Role  |
-|--------|--------------------|------|-------|
-| POST   | `/auth/login`      | ❌   | Any   |
-| GET    | `/tasks`           | 🔒   | Any (Admin=All, User=Own tasks) |
-| POST   | `/tasks`           | 🔒   | Admin only |
-| PUT    | `/tasks/:id`       | 🔒   | Any (User restricted to status-only on own tasks) |
-| DELETE | `/tasks/:id`       | 🔒   | Admin only |
-| GET    | `/users`           | 🔒   | Admin only |
-
-> *Run `.\test_api.ps1` in the `backend/` folder to run an automated suite of 16 security and API tests.*
-
+## Known Limitations
+- Web platform not supported (React Native mobile only)
+- No push notifications
+- Token stored in AsyncStorage (standard for React Native, not applicable to web)

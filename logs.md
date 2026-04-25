@@ -123,3 +123,41 @@
 | 04:57 | Ran `/recap` and synced `decisions.md` & `handoff.md` with new status |
 
 ---
+
+## Session 2 — 2026-04-25 (Security & UX Polish)
+
+### Phase 1: Knowledge & Skills Integration
+
+| Time | Action |
+|---|---|
+| 02:00 | Cloned `VibeSec-Skill` repository to `.agent/skills/VibeSec-Skill` |
+| 02:03 | Initialized security audit based on `VibeSec-Skill` guidelines |
+
+### Phase 2: Backend Security Hardening
+
+| Time | Action |
+|---|---|
+| 02:08 | **Fix 1:** Implemented explicit field whitelisting in `taskController.js` (updateTask) |
+| 02:09 | **Fix 2:** Integrated `express-rate-limit` for `/api/auth/login` (10 tries/15 min) |
+| 02:10 | **Role Escalation Fix:** Patched `authController.js` to prevent self-assignment of admin roles |
+| 02:11 | Verified all controllers against Mass Assignment vulnerabilities |
+
+### Phase 3: Mobile UX Polish & Web Clean-up
+
+| Time | Action |
+|---|---|
+| 02:15 | Removed `react-native-web`, `react-dom`, and `@expo/metro-runtime` per requirement |
+| 02:17 | **Fix 1:** Added chevron-forward indicator to `TaskCard.js` for better affordance |
+| 02:18 | **Fix 2:** Implemented contextual empty states in `TaskListScreen.js` (no search vs no tasks) |
+| 02:19 | **Fix 3:** Integrated `react-native-toast-message` for real-time status feedback |
+| 02:20 | Configured `<Toast />` in `App.js` with `bottomOffset={80}` for tab bar compatibility |
+
+### Phase 4: Final Security & UX Verification (/secure, /ux)
+
+- ✅ **Role Escalation:** Blocking `role` in signup prevents privilege escalation.
+- ✅ **Rate Limiting:** `loginLimiter` active and returning 429 on abuse.
+- ✅ **Mass Assignment:** All update logic now uses explicit field allowlists.
+- ✅ **Empty States:** Correct icons and text shown for filter-empty vs. list-empty.
+- ✅ **Toasts:** Feedback appears above the bottom tab bar on status change.
+
+---

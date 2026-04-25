@@ -11,10 +11,8 @@ const signupValidation = [
   body("password")
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters"),
-  body("role")
-    .optional()
-    .isIn(["admin", "user"])
-    .withMessage("Role must be admin or user"),
+  // NOTE: role is intentionally NOT accepted from the request body.
+  // All self-registered accounts are created as 'user'. Admins are seeded only.
 ];
 
 const loginValidation = [
@@ -34,7 +32,7 @@ const signToken = (user) => {
 
 const signup = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body; // role is NOT accepted from client
 
     const existing = await User.findOne({ email });
     if (existing) {
@@ -42,7 +40,7 @@ const signup = async (req, res, next) => {
     }
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed, role });
+    const user = await User.create({ name, email, password: hashed, role: "user" });
 
     const token = signToken(user);
 

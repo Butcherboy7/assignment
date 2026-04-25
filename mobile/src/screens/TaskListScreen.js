@@ -8,9 +8,9 @@ import {
   Text,
   StyleSheet,
   RefreshControl,
-  SafeAreaView,
   Animated,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
@@ -80,7 +80,7 @@ const TaskListScreen = ({ navigation }) => {
   if (loading) return <LoadingScreen text="Fetching your tasks…" />;
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={["top"]}>
       <AppHeader title="Tasks" subtitle={isAdmin ? "All company tasks" : "Assigned to you"} />
 
       {/* Top Bar: Search & Filter */}
@@ -144,19 +144,26 @@ const TaskListScreen = ({ navigation }) => {
             colors={[theme.colors.primary]}
           />
         }
-        ListEmptyComponent={
-          <EmptyState
-            icon="document-text-outline"
-            title="No tasks found"
-            subtitle={
-              search
-                ? "Try a different search term."
-                : activeFilter !== "All"
-                ? `No ${activeFilter.toLowerCase()} tasks match.`
-                : "Good job! Zero tasks right now."
-            }
-          />
-        }
+        ListEmptyComponent={(() => {
+          if (loading) return null;
+          const hasActiveFilters = activeFilter !== "All" || search.trim() !== "";
+          if (hasActiveFilters) {
+            return (
+              <EmptyState
+                icon="search-outline"
+                title="No matching tasks"
+                subtitle="Try a different filter or search term"
+              />
+            );
+          }
+          return (
+            <EmptyState
+              icon="checkmark-circle-outline"
+              title="No tasks yet"
+              subtitle="Tasks assigned to you will appear here"
+            />
+          );
+        })()}
       />
     </SafeAreaView>
   );
@@ -209,7 +216,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     justifyContent: "center",
   },
-  pillActive: { 
+  pillActive: {
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primaryDark,
   },

@@ -224,16 +224,19 @@ npx expo start
 - [x] Backend: Models, Middleware, Controllers, Routes
 - [x] Backend: Seeded with test data
 - [x] Backend: Connected to MongoDB Atlas
+- [x] Backend: **Login Rate Limiting** (10 attempts / 15 min)
+- [x] Backend: **Zero Role Escalation** (protected signup)
+- [x] Backend: **Strict Mass Assignment protection** (field whitelisting)
 - [x] Mobile: Expo scaffold + all deps
 - [x] Mobile: Auth context + JWT persistence
 - [x] Mobile: Role-gated navigation (user 2 tabs, admin 4 tabs)
 - [x] Mobile: All 6 screens built
+- [x] Mobile: **UX Polish** (chevrons, smart empty states, toast feedback)
 - [x] API: 16/16 endpoint tests passing
 - [x] CI/CD: eas.json configured for APK preview build
-- [x] **Web Support:** Installed `react-native-web` for instantaneous browser demoing
-- [x] **UI/UX V2:** Overhauled all components with deep dark mode, glassmorphic glows, and staggered animations.
+- [x] **Skill Integration:** Integrated `VibeSec-Skill` for ongoing security audits.
 
 ## Next Steps (Tomorrow)
-1. Fix the `<BottomTabItem>` crash occurring specifically on the Web platform after login (likely an icon/navigation conflict).
-2. Code review the UI changes and fine-tune any mismatched paddings across iOS/Android/Web bounds.
-3. Test the built APK on a physical Android device.
+1. Manual penetration testing of the new rate limiting and whitelisting.
+2. Final visual check on physical Android/iOS devices for any padding quirks.
+3. Prepare production build for final submission.

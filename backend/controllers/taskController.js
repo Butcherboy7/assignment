@@ -98,26 +98,26 @@ const updateTask = async (req, res, next) => {
     }
 
     if (req.user.role === "admin") {
-      const { title, description, status, priority, assignedTo, dueDate } =
-        req.body;
-      if (title !== undefined) task.title = title;
-      if (description !== undefined) task.description = description;
-      if (status !== undefined) task.status = status;
-      if (priority !== undefined) task.priority = priority;
-      if (assignedTo !== undefined) task.assignedTo = assignedTo;
-      if (dueDate !== undefined) task.dueDate = dueDate;
+      // Explicit whitelist — only these fields may be written; role/createdBy/etc. are never touched
+      const allowedFields = ["title", "description", "status", "priority", "assignedTo", "dueDate"];
+      const updates = {};
+      allowedFields.forEach((field) => {
+        if (req.body[field] !== undefined) updates[field] = req.body[field];
+      });
+      Object.keys(updates).forEach((key) => {
+        task[key] = updates[key];
+      });
     } else {
-      // Regular user — must own the task
+      // Regular user — must own the task; only status is accepted, everything else ignored
       if (task.assignedTo.toString() !== req.user.id) {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      const { status } = req.body;
+      const status = req.body.status; // explicit extraction — no spread
       const allowedTransitions = ["in-progress", "completed"];
       if (!status || !allowedTransitions.includes(status)) {
         return res.status(400).json({
-          message:
-            "Users can only set status to 'in-progress' or 'completed'",
+          message: "Users can only set status to 'in-progress' or 'completed'",
         });
       }
       task.status = status;
