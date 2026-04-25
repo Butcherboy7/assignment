@@ -15,7 +15,17 @@ Mobile: Expo, React Navigation, Axios, AsyncStorage, react-native-toast-message
 - You need **Node.js 18+** installed on your computer.
 - You need the **Expo Go** app installed on your smartphone (available on iOS App Store and Google Play Store).
 
-### Step 1: Start the Backend (API)
+### 🔍 Engineering Documentation
+**For the Reviewer:** I strongly believe in disciplined project maintenance and technical scoping. Please take a look at my included **`logs.md`** and **`decisions.md`** files in the root directory to review the chronological progress and architectural choices made throughout this project's lifecycle!
+
+### Step 1: Clone the Repository
+Open a terminal and run the following command to download the code:
+```bash
+git clone https://github.com/Butcherboy7/assignment.git
+cd assignment
+```
+
+### Step 2: Start the Backend (API)
 Follow these exact steps to start the server:
 
 1. Open a new Terminal (or Command Prompt).
