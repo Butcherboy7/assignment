@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
@@ -82,8 +82,16 @@ const AppNavigator = () => {
 
   if (isLoading) return <LoadingScreen text="TaskFlow Workspace..." />;
 
+  const navTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: theme.colors.background,
+    },
+  };
+
   return (
-    <NavigationContainer theme={{ colors: { background: theme.colors.background } }}>
+    <NavigationContainer theme={navTheme}>
       {!user ? (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login" component={LoginScreen} />

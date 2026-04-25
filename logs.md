@@ -160,4 +160,14 @@
 - ✅ **Empty States:** Correct icons and text shown for filter-empty vs. list-empty.
 - ✅ **Toasts:** Feedback appears above the bottom tab bar on status change.
 
+### Phase 5: Keyboard and Native UX Improvements
+
+| Time | Action |
+|---|---|
+| ~02:40 | **Fix 1:** Added global `TouchableWithoutFeedback` to `LoginScreen` and `CreateTaskScreen` for native keyboard dismissal. |
+| ~02:42 | **Fix 2:** Enhanced `TaskListScreen` search input with native `returnKeyType="search"`, clear button, and `keyboardDismissMode="on-drag"` for FlatList. |
+| ~02:45 | **Fix 3:** Integrated `@react-native-community/datetimepicker` to replace text input with native iOS spinner / Android modal for due dates. |
+| ~02:48 | **Bugfix:** Resolved React Navigation 7 header crash (`fonts.regular` missing) by extending `DefaultTheme`. |
+| ~02:50 | **Bugfix:** Removed floating 88px black bar by zeroing out incorrect `keyboardVerticalOffset` calculations in tabulated views. |
+
 ---

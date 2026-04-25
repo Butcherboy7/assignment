@@ -9,6 +9,7 @@ import {
   StyleSheet,
   RefreshControl,
   Animated,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -93,8 +94,19 @@ const TaskListScreen = ({ navigation }) => {
             placeholderTextColor={theme.colors.subtext}
             value={search}
             onChangeText={setSearch}
-            clearButtonMode="while-editing"
+            returnKeyType="search"
+            onSubmitEditing={() => Keyboard.dismiss()}
+            blurOnSubmit={true}
           />
+          {search.length > 0 && (
+            <TouchableOpacity
+              onPress={() => { setSearch(""); Keyboard.dismiss(); }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              style={{ padding: 4, marginRight: 8 }}
+            >
+              <Ionicons name="close-circle" size={18} color={theme.colors.subtext} />
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.filterScrollerWrap}>
@@ -136,6 +148,8 @@ const TaskListScreen = ({ navigation }) => {
             onPress={() => navigation.navigate("TaskDetail", { taskId: item._id })}
           />
         )}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

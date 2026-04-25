@@ -1,0 +1,11 @@
+feat(app): production-ready task manager with role-based access
+
+- JWT authentication with role-based access control
+- Admin and user role enforcement at middleware level  
+- Task CRUD with ownership verification
+- Rate limiting on authentication endpoints
+- Input whitelisting on update operations
+- Dark theme UI with status and priority indicators
+- Toast feedback on task status updates
+- Platform-aware safe area handling
+- Seed script for immediate testing

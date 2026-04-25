@@ -7,9 +7,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   Animated,
+  Keyboard,
+  TouchableWithoutFeedback,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -55,77 +57,79 @@ const LoginScreen = () => {
       <View style={styles.bgGlowTop} />
       <View style={styles.bgGlowBottom} />
 
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.center}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.center}>
+          <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
-          <Animated.View style={[styles.card, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}>
+            <Animated.View style={[styles.card, { opacity: fadeAnim, transform: [{ translateY: translateYAnim }] }]}>
 
-            <View style={styles.logoContainer}>
-              <View style={styles.logoIcon}>
-                <Ionicons name="checkmark-done" size={40} color="#fff" />
+              <View style={styles.logoContainer}>
+                <View style={styles.logoIcon}>
+                  <Ionicons name="checkmark-done" size={40} color="#fff" />
+                </View>
+                <Text style={styles.logoText}>TaskFlow</Text>
               </View>
-              <Text style={styles.logoText}>TaskFlow</Text>
-            </View>
-            <Text style={styles.subtitle}>Sign in to your workspace</Text>
+              <Text style={styles.subtitle}>Sign in to your workspace</Text>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email Address</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons name="mail-outline" size={20} color={theme.colors.subtext} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="name@company.com"
-                  placeholderTextColor={theme.colors.subtext}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={!loading}
-                />
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Email Address</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="mail-outline" size={20} color={theme.colors.subtext} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="name@company.com"
+                    placeholderTextColor={theme.colors.subtext}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    editable={!loading}
+                  />
+                </View>
               </View>
-            </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons name="lock-closed-outline" size={20} color={theme.colors.subtext} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="••••••••"
-                  placeholderTextColor={theme.colors.subtext}
-                  secureTextEntry
-                  editable={!loading}
-                  onSubmitEditing={handleLogin}
-                />
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Password</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons name="lock-closed-outline" size={20} color={theme.colors.subtext} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="••••••••"
+                    placeholderTextColor={theme.colors.subtext}
+                    secureTextEntry
+                    editable={!loading}
+                    onSubmitEditing={handleLogin}
+                  />
+                </View>
               </View>
-            </View>
 
-            {error ? (
-              <Animated.View style={styles.errorContainer}>
-                <Ionicons name="alert-circle" size={16} color={theme.colors.error} />
-                <Text style={styles.errorText}>{error}</Text>
-              </Animated.View>
-            ) : null}
+              {error ? (
+                <Animated.View style={styles.errorContainer}>
+                  <Ionicons name="alert-circle" size={16} color={theme.colors.error} />
+                  <Text style={styles.errorText}>{error}</Text>
+                </Animated.View>
+              ) : null}
 
-            <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
-              onPress={handleLogin}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Continue</Text>
-              )}
-            </TouchableOpacity>
-          </Animated.View>
+              <TouchableOpacity
+                style={[styles.button, loading && styles.buttonDisabled]}
+                onPress={handleLogin}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Continue</Text>
+                )}
+              </TouchableOpacity>
+            </Animated.View>
 
-        </ScrollView>
-      </KeyboardAvoidingView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 };

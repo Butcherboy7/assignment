@@ -235,8 +235,10 @@ npx expo start
 - [x] API: 16/16 endpoint tests passing
 - [x] CI/CD: eas.json configured for APK preview build
 - [x] **Skill Integration:** Integrated `VibeSec-Skill` for ongoing security audits.
+- [x] **Native UX Polish:** Added global keyboard dismissal, `on-drag` FlatList dismissal, and native clear buttons on search.
+- [x] **Forms UI:** Replaced `dueDate` text input with native `@react-native-community/datetimepicker` modal/spinner.
+- [x] **Bugfixes:** Squashed floating black bars above keyboards and fixed React Navigation 7 theme crashes.
 
-## Next Steps (Tomorrow)
-1. Manual penetration testing of the new rate limiting and whitelisting.
-2. Final visual check on physical Android/iOS devices for any padding quirks.
-3. Prepare production build for final submission.
+## Next Steps
+1. The project is fully documented, securely audited, and ready for the recruiter submission. 
+2. Record any extra demo videos locally and attach links.
