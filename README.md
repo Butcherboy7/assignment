@@ -68,14 +68,11 @@ Use these ready-to-go test accounts to log in from your phone:
 
 
 ## Troubleshooting ⚠️
-**MongoDB IP Whitelist Error:** If the backend terminal says `Could not connect to any servers in your MongoDB Atlas cluster`, your database requires your current Wi-Fi network's IP address to be allowed.
-**The Instant Fix:**
-1. Log into your MongoDB Atlas dashboard.
-2. Go to **Network Access** (under Security on the left menu).
-3. Click **Add IP Address**.
-4. Instead of clicking "Add Current IP", manually type exactly `0.0.0.0/0` into the Access List Entry box.
-5. Click **Confirm** and wait 2 minutes for it to say "Active".
-6. Restart the backend terminal and it will connect instantly!
+**MongoDB IP Whitelist Error:** If the backend terminal says `Could not connect to any servers in your MongoDB Atlas cluster`, our cloud database security firewall is blocking your specific IP address.
+**The Fix:**
+1. Open the `/backend/.env` file.
+2. Replace the `MONGO_URI` value with your own local or cloud MongoDB connection string.
+3. Restart the backend terminal!
 
 ## Features
 ### Admin
